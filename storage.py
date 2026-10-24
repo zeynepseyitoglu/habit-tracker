@@ -47,3 +47,33 @@ def dict_to_habit(data: dict) -> Habit:
     )
     habit.completions = [datetime.fromisoformat(s) for s in data["completions"]]
     return habit
+
+def  save_habits(habits: list[Habit], path: str) -> None:
+    """Save all habits to a JSON file, replacing its previus contents.
+    
+    Args:
+        habits: Every habit that will be saved.
+        path: The file to write.
+        """
+
+    data = [habit_to_dict(h) for h in habits]
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def load_habits(path:str) -> list[Habit]:
+    """Load all habits from a JSON file.
+    
+    Args:
+        path: The file to read from.
+        
+    Returns:
+        The saved habits, or and empty list if the file does not exist.
+    """
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        data = []
+    return [dict_to_habit(d) for d in data]
