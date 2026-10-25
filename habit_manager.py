@@ -60,3 +60,21 @@ class HabitManager:
         if self.find_habit(habit.name) is not None:
             raise ValueError(f"A habit called '{habit.name}' already exists.")
         self.habits.append(habit)
+
+    def delete_habit(self, name:str) -> bool:
+        """Delete the habit with the given name, if it exists.
+
+        Matching ignores capital letters, like ``find_habit``.
+
+        Args:
+            name: The name of the habit to delete.
+
+        Returns:
+            True if a habit was deleted, False if no habit had that name.
+        """
+        habit = self.find_habit(name)
+
+        if habit is None:
+            return False
+        self.habits.remove(habit)
+        return True
