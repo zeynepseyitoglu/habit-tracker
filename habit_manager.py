@@ -45,3 +45,18 @@ class HabitManager:
                 return habit
 
         return None
+
+    def add_habit(self, habit: Habit) -> None:
+        """Adds a new habit to be tracked.
+
+        Names must be unique, ignoring capital letters.
+
+        Args:
+            habit: the habit to add.
+        
+        Raises:
+            ValueError: If a habit with the same name already exists.
+        """
+        if self.find_habit(habit.name) is not None:
+            raise ValueError(f"A habit called '{habit.name}' already exists.")
+        self.habits.append(habit)
