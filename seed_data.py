@@ -46,3 +46,9 @@ def create_predefined_habits(today: datetime | None = None) -> list[Habit]:
     budget.check_off(today - timedelta(days=2))
 
     return [water, stretch, bathroom, run, budget]
+
+if __name__ == "__main__":
+    save_habits(create_predefined_habits(), "habits.json")
+    print(
+        "Saved 5 example habits to habits.json."
+    )
