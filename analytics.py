@@ -112,4 +112,17 @@ def longest_streak_for(habit: Habit) -> int:
             best = current
         previous = period
     return best
+
+
+def longest_streak_overall(habits: list[Habit]) -> int:
+    """Calculate the longest streak among all habits.
     
+    Args:
+        habits: The habit list to compare.
+        
+    Returns:
+        The longest streak of all habits, or 0 if there are no habits.
+    """
+    return(
+        max([longest_streak_for(h) for h in habits], default=0)
+    )
