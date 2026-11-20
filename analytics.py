@@ -70,3 +70,46 @@ def period_number(when: datetime, periodicity: Periodicity) -> int:
     if periodicity == Periodicity.WEEKLY:
         return (when.date().toordinal() - when.weekday()) // 7
     return when.year * 12 + when.month
+
+def completed_periods(habit: Habit) -> list[int]:
+    """Return the numbers of every period in which the habit was 
+    compelted.
+    
+    Args: 
+        habit: The habit to examine.
+        
+    Returns:
+        sorted period numbers without duplicates.
+    """
+    return sorted(
+        {period_number(t, habit.periodicity) for t in habit.completions}
+    )
+
+def longest_streak_for(habit: Habit) -> int:
+    """Return the longest run of consecutive completed periods.
+
+    Args:
+        habit: The habit to examine.
+
+    Returns:
+        The length of the longest streak, or 0 if the habit
+        was never completed.
+    """
+    periods = completed_periods(habit)
+    if not periods:
+        return 0
+
+    current = 1
+    best = 1
+    previous = periods[0]
+
+    for period in periods[1:]:
+        if period == previous + 1:
+            current = current + 1
+        else:
+            current = 1
+        if current > best:
+            best = current
+        previous = period
+    return best
+    
