@@ -67,6 +67,11 @@ def test_check_offs_out_of_order_still_count():
     assert longest_streak_for(habit) == 3
 
 
+def test_weekly_streak_accross_new_year():
+    habit = make_habit(Periodicity.WEEKLY, [datetime(2026, 12, 28, 9, 0), datetime(2027, 1, 4, 9, 0)])
+    assert longest_streak_for(habit) == 2
+
+
 def test_monthly_streak_accross_new_year():
     habit = make_habit(Periodicity.MONTHLY, [datetime(2026, 12, 15, 9, 0), datetime(2027, 1, 15, 9, 0)])
     assert longest_streak_for(habit) == 2
