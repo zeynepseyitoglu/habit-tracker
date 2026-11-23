@@ -5,6 +5,7 @@ import click
 from datetime import datetime, timedelta
 from habit import Habit, Periodicity
 from habit_manager import HabitManager
+from seed_data import create_predefined_habits
 from analytics import habits_by_periodicity, longest_streak_overall, longest_streak_for
 from storage import load_habits, save_habits
 
@@ -88,11 +89,28 @@ def show_streaks_from_menu(manager:HabitManager) -> None:
     click.echo(f'Best streak overall among all habits: {longest_streak_overall(habits)}.')
 
 
+def delete_habit_from_menu(manager: HabitManager) -> None:
+    """Let the user pick a habit and delete it after confirming."""
+    habit = choose_habit(manager, "Which habit should be deleted?")
+    if habit is None:
+        return
+    if click.confirm(f'Delete "{habit.name}" and all its history?'):
+        manager.delete_habit(habit.name)
+        save_habits(manager.get_all(), HABITS_FILE)
+        click.echo(f'Deleted "{habit.name}".')
+    else:
+        click.echo("Nothing deleted.")
+
 
 @click.command()
 def main():
     """Start the main habit tracker menu."""
-    manager = HabitManager(load_habits(HABITS_FILE))
+    habits = load_habits(HABITS_FILE)
+    if not habits and click.confirm("No habits yet. Load 5 example habits with 4 weeks of data?"):
+        habits = create_predefined_habits()
+        save_habits(habits, HABITS_FILE)
+
+    manager = HabitManager(habits)
     click.echo("welcome to Habit Tracker!")
 
     while True:
@@ -113,6 +131,8 @@ def main():
             show_habits_from_menu(manager)
         elif choice == 4:
             show_streaks_from_menu(manager)
+        elif choice == 5:
+            delete_habit_from_menu(manager)
         elif choice == 6:
             click.echo("Goodbye! Your habits are saved.")
             break
