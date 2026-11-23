@@ -2,10 +2,30 @@
 
 import click
 
+from habit import Habit, Periodicity
 from habit_manager import HabitManager
 from storage import load_habits, save_habits
 
 HABITS_FILE = 'habits.json'
+
+
+def add_habit_from_menu(manager: HabitManager) -> None:
+    """Ask for a new habit's details, add it and save."""
+    name = click.prompt("Name").strip()
+    description = click.prompt('Description').strip()
+    periodicity = click.prompt(
+        "Periodicity",
+        type=click.Choice(["daily", "weekly", "monthly"], case_sensitive=False),
+        default="daily",
+    )
+    habit = Habit(name, description, Periodicity(periodicity.lower()))
+    try:
+        manager.add_habit(habit)
+    except ValueError as error:
+        click.echo(error)
+        return
+    save_habits(manager.get_all(), HABITS_FILE)
+    click.echo(f'Added "{name}" ({periodicity}).')
 
 
 @click.command()
@@ -24,7 +44,10 @@ def main():
         click.echo("  6) Quit")
         choice = click.prompt("Choose", type=click.IntRange(1, 6))
 
-        if choice == 6:
+        if choice == 1:
+            add_habit_from_menu(manager)
+
+        elif choice == 6:
             click.echo("Goodbye! Your habits are saved.")
             break
 
