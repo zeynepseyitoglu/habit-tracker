@@ -5,6 +5,7 @@ import click
 from datetime import datetime, timedelta
 from habit import Habit, Periodicity
 from habit_manager import HabitManager
+from analytics import habits_by_periodicity, longest_streak_overall, longest_streak_for
 from storage import load_habits, save_habits
 
 HABITS_FILE = 'habits.json'
@@ -59,6 +60,35 @@ def check_off_from_menu(manager: HabitManager) -> None:
     click.echo(f'Checked off "{habit.name}". Nice work!')
 
 
+def show_habits_from_menu(manager: HabitManager) -> None:
+    """List the habits, either all of them or only one."""
+    which = click.prompt(
+        "Show which habits?",
+        type=click.Choice(['all', 'daily', 'weekly', 'monthly'], case_sensitive=False),
+        default='all'
+    )
+    habits = manager.get_all()
+    if which.lower() != "all":
+        habits = habits_by_periodicity(habits, Periodicity(which.lower()))
+    if not habits:
+        click.echo("No habits to show.")
+        return
+    for habit in habits:
+        click.echo(f' - {habit.name} ({habit.periodicity.value}): {habit.description}')
+
+
+def show_streaks_from_menu(manager:HabitManager) -> None:
+    """Show each habit's longest streak and the best streak overall."""
+    habits = manager.get_all()
+    if not habits:
+        click.echo("You have no habits yet.")
+        return
+    for habit in habits:
+        click.echo(f' - {habit.name}: longest streak {longest_streak_for(habit)} ({habit.periodicity.value}).')
+    click.echo(f'Best streak overall among all habits: {longest_streak_overall(habits)}.')
+
+
+
 @click.command()
 def main():
     """Start the main habit tracker menu."""
@@ -79,6 +109,10 @@ def main():
             add_habit_from_menu(manager)
         elif choice == 2:
             check_off_from_menu(manager)
+        elif choice == 3:
+            show_habits_from_menu(manager)
+        elif choice == 4:
+            show_streaks_from_menu(manager)
         elif choice == 6:
             click.echo("Goodbye! Your habits are saved.")
             break
