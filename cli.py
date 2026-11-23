@@ -2,6 +2,7 @@
 
 import click
 
+from datetime import datetime, timedelta
 from habit import Habit, Periodicity
 from habit_manager import HabitManager
 from storage import load_habits, save_habits
@@ -28,6 +29,36 @@ def add_habit_from_menu(manager: HabitManager) -> None:
     click.echo(f'Added "{name}" ({periodicity}).')
 
 
+def choose_habit(manager: HabitManager, question: str) -> Habit | None:
+    """Show the habits as a numbered list and return the one the user picks.
+    
+    Returns None if there are no habits.
+    """
+    habits = manager.get_all()
+    if not habits:
+        click.echo("You have no habits yet.")
+        return None
+    click.echo(question)
+    for number, habit in enumerate(habits, start=1):
+        click.echo(f" {number}) {habit.name}")
+    choice = click.prompt("Choose", type=click.IntRange(1, len(habits)))
+    return habits[choice - 1]
+
+
+def check_off_from_menu(manager: HabitManager) -> None:
+    """Let user pick a habit and check it off, today or a recent day.
+    """
+    habit = choose_habit(manager, "Which habit did you do?")
+    if habit is None:
+        return
+    days_ago = click.prompt(
+        "How many days ago? (0 = today)", type=click.IntRange(0, 7), default=0
+    )
+    habit.check_off(datetime.now() - timedelta(days=days_ago))
+    save_habits(manager.get_all(), HABITS_FILE)
+    click.echo(f'Checked off "{habit.name}". Nice work!')
+
+
 @click.command()
 def main():
     """Start the main habit tracker menu."""
@@ -46,7 +77,8 @@ def main():
 
         if choice == 1:
             add_habit_from_menu(manager)
-
+        elif choice == 2:
+            check_off_from_menu(manager)
         elif choice == 6:
             click.echo("Goodbye! Your habits are saved.")
             break
